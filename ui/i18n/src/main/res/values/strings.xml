@@ -276,12 +276,12 @@
         <item quantity="other">%d episodes marked as unplayed.</item>
     </plurals>
     <string name="add_to_queue_label">Add to queue</string>
+    <string name="play_next_label">Play Next</string>
+    <string name="add_to_end_of_queue_label">Add to End of Queue</string>
     <plurals name="added_to_queue_message">
         <item quantity="one">%d episode added to queue.</item>
         <item quantity="other">%d episodes added to queue.</item>
     </plurals>
-    <string name="play_next_label">Play Next</string>
-    <string name="add_to_end_of_queue_label">Add to End of Queue</string>
     <string name="remove_from_queue_label">Remove from queue</string>
     <string name="add_to_group_label">Add to episode group</string>
     <string name="remove_from_group_label">Remove from group</string>
