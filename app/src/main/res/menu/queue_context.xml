@@ -11,6 +11,16 @@
         android:id="@+id/move_to_bottom_item"
         android:menuCategory="container"
         android:title="@string/move_to_bottom_label" />
+    <item
+        android:id="@+id/lock_queue_item_item"
+        android:menuCategory="container"
+        android:title="@string/lock_queue_item_label" />
+
+    <item
+        android:id="@+id/unlock_queue_item_item"
+        android:menuCategory="container"
+        android:title="@string/unlock_queue_item_label" />
+
     <!-- rest of the menu items can be found in the generic feeditemlist_context.xml -->
 
 </menu>

@@ -280,7 +280,23 @@
         <item quantity="one">%d episode added to queue.</item>
         <item quantity="other">%d episodes added to queue.</item>
     </plurals>
+    <string name="play_next_label">Play Next</string>
+    <string name="add_to_end_of_queue_label">Add to End of Queue</string>
     <string name="remove_from_queue_label">Remove from queue</string>
+    <string name="add_to_group_label">Add to episode group</string>
+    <string name="remove_from_group_label">Remove from group</string>
+    <string name="queue_group_label">Queue entire group</string>
+    <string name="group_name_dialog_title">Assign to group</string>
+    <string name="group_name_hint">Group name (e.g. "Serial Season 1")</string>
+    <string name="queue_group_question">This episode belongs to the group "%s". Add all episodes from this group to the queue?</string>
+    <string name="queue_group_add_all">Add group</string>
+    <string name="queue_group_add_one">This episode only</string>
+    <string name="removed_from_group_message">Removed from group "%s"</string>
+    <string name="group_name_existing">Existing groups:</string>
+    <string name="lock_queue_item_label">Lock position in queue</string>
+    <string name="unlock_queue_item_label">Unlock position in queue</string>
+    <string name="queue_item_position_locked">Position locked</string>
+    <string name="queue_item_position_unlocked">Position unlocked</string>
     <plurals name="removed_from_queue_message">
         <item quantity="one">%d episode removed from queue.</item>
         <item quantity="other">%d episodes removed from queue.</item>

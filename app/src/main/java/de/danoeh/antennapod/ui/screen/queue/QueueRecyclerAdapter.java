@@ -9,7 +9,9 @@ import android.view.View;
 
 import androidx.fragment.app.FragmentActivity;
 import de.danoeh.antennapod.R;
+import de.danoeh.antennapod.model.feed.FeedItem;
 import de.danoeh.antennapod.ui.episodeslist.EpisodeItemListAdapter;
+import de.danoeh.antennapod.storage.preferences.EpisodeGroupPreferences;
 import de.danoeh.antennapod.storage.preferences.UserPreferences;
 import de.danoeh.antennapod.ui.swipeactions.SwipeActions;
 import de.danoeh.antennapod.ui.episodeslist.EpisodeItemViewHolder;
@@ -38,7 +40,12 @@ public class QueueRecyclerAdapter extends EpisodeItemListAdapter {
     @Override
     @SuppressLint("ClickableViewAccessibility")
     protected void afterBindViewHolder(EpisodeItemViewHolder holder, int pos) {
-        if (!dragDropEnabled) {
+        FeedItem item = getItem(pos);
+        boolean itemLocked = item != null
+                && EpisodeGroupPreferences.isQueueItemLocked(getActivity(), item.getId());
+        boolean canDrag = dragDropEnabled && !itemLocked;
+
+        if (!canDrag) {
             holder.dragHandle.setVisibility(View.GONE);
             holder.dragHandle.setOnTouchListener(null);
             holder.coverHolder.setOnTouchListener(null);
@@ -88,9 +95,16 @@ public class QueueRecyclerAdapter extends EpisodeItemListAdapter {
             if (getItem(getItemCount() - 1).getId() == getLongPressedItem().getId() || keepSorted) {
                 menu.findItem(R.id.move_to_bottom_item).setVisible(false);
             }
+            // Show lock or unlock based on current per-item lock state
+            boolean isItemLocked = EpisodeGroupPreferences.isQueueItemLocked(
+                    getActivity(), getLongPressedItem().getId());
+            menu.findItem(R.id.lock_queue_item_item).setVisible(!isItemLocked);
+            menu.findItem(R.id.unlock_queue_item_item).setVisible(isItemLocked);
         } else {
             menu.findItem(R.id.move_to_top_item).setVisible(false);
             menu.findItem(R.id.move_to_bottom_item).setVisible(false);
+            menu.findItem(R.id.lock_queue_item_item).setVisible(false);
+            menu.findItem(R.id.unlock_queue_item_item).setVisible(false);
         }
     }
 }

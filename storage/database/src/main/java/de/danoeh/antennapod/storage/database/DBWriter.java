@@ -371,6 +371,104 @@ public class DBWriter {
     }
 
     /**
+     * Inserts FeedItem objects into the queue right after the currently playing item.
+     * If nothing is playing, inserts at the front. Ignores the user's default enqueue preference.
+     */
+    public static Future<?> addQueueItemNext(final Context context, final FeedItem... items) {
+        return runOnDbThread(() -> {
+            if (items.length < 1) {
+                return;
+            }
+            final PodDBAdapter adapter = PodDBAdapter.getInstance();
+            adapter.open();
+            final List<FeedItem> queue = DBReader.getQueue();
+
+            List<FeedItem> markAsUnplayed = new ArrayList<>();
+            List<QueueEvent> events = new ArrayList<>();
+            List<FeedItem> updatedItems = new ArrayList<>();
+            ItemEnqueuePositionCalculator positionCalculator =
+                    new ItemEnqueuePositionCalculator(UserPreferences.EnqueueLocation.AFTER_CURRENTLY_PLAYING);
+            Playable currentlyPlaying = DBReader.getFeedMedia(PlaybackPreferences.getCurrentlyPlayingFeedMediaId());
+            int insertPosition = positionCalculator.calcPosition(queue, currentlyPlaying);
+            for (FeedItem item : items) {
+                if (itemListContains(queue, item.getId())) {
+                    continue;
+                } else if (!item.hasMedia()) {
+                    continue;
+                }
+                queue.add(insertPosition, item);
+                events.add(QueueEvent.added(item, insertPosition));
+                item.addTag(FeedItem.TAG_QUEUE);
+                updatedItems.add(item);
+                if (item.isNew()) {
+                    markAsUnplayed.add(item);
+                }
+                insertPosition++;
+            }
+            if (!updatedItems.isEmpty()) {
+                applySortOrder(queue, events);
+                adapter.setQueue(queue);
+                for (QueueEvent event : events) {
+                    EventBus.getDefault().post(event);
+                }
+                EventBus.getDefault().post(FeedItemEvent.updated(updatedItems));
+                if (markAsUnplayed.size() > 0) {
+                    DBWriter.markItemPlayed(FeedItem.UNPLAYED, false, markAsUnplayed.toArray(new FeedItem[0]));
+                }
+            }
+            adapter.close();
+            AutoDownloadManager.getInstance().autodownloadUndownloadedItems(context);
+        });
+    }
+
+    /**
+     * Appends FeedItem objects to the end of the queue, always, regardless of the user's enqueue preference.
+     */
+    public static Future<?> addQueueItemToEnd(final Context context, final FeedItem... items) {
+        return runOnDbThread(() -> {
+            if (items.length < 1) {
+                return;
+            }
+            final PodDBAdapter adapter = PodDBAdapter.getInstance();
+            adapter.open();
+            final List<FeedItem> queue = DBReader.getQueue();
+
+            List<FeedItem> markAsUnplayed = new ArrayList<>();
+            List<QueueEvent> events = new ArrayList<>();
+            List<FeedItem> updatedItems = new ArrayList<>();
+            int insertPosition = queue.size();
+            for (FeedItem item : items) {
+                if (itemListContains(queue, item.getId())) {
+                    continue;
+                } else if (!item.hasMedia()) {
+                    continue;
+                }
+                queue.add(insertPosition, item);
+                events.add(QueueEvent.added(item, insertPosition));
+                item.addTag(FeedItem.TAG_QUEUE);
+                updatedItems.add(item);
+                if (item.isNew()) {
+                    markAsUnplayed.add(item);
+                }
+                insertPosition++;
+            }
+            if (!updatedItems.isEmpty()) {
+                applySortOrder(queue, events);
+                adapter.setQueue(queue);
+                for (QueueEvent event : events) {
+                    EventBus.getDefault().post(event);
+                }
+                EventBus.getDefault().post(FeedItemEvent.updated(updatedItems));
+                if (markAsUnplayed.size() > 0) {
+                    DBWriter.markItemPlayed(FeedItem.UNPLAYED, false, markAsUnplayed.toArray(new FeedItem[0]));
+                }
+            }
+            adapter.close();
+            AutoDownloadManager.getInstance().autodownloadUndownloadedItems(context);
+        });
+    }
+
+    /**
      * Appends FeedItem objects to the end of the queue. The 'read'-attribute of all items will be set to true.
      * If a FeedItem is already in the queue, the FeedItem will not change its position in the queue.
      *

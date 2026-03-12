@@ -10,26 +10,42 @@
     <color name="image_readability_tint">#80000000</color>
     <color name="feed_text_bg">#55333333</color>
 
-    <!-- Theme colors -->
-    <color name="background_light">#f9fcff</color>
-    <color name="background_elevated_light">#EFEEEE</color>
-    <color name="background_darktheme">#21272b</color>
-    <color name="background_elevated_darktheme">#2D3337</color>
+    <!-- Custom palette: Scheele Green + Deep Copper -->
+    <!-- Core palette -->
+    <color name="scheele_green">#478800</color>        <!-- Brand primary / links / active icons -->
+    <color name="deep_moss">#2F5A14</color>            <!-- Primary buttons bg -->
+    <color name="copper_accent">#B87333</color>        <!-- Decorative accent -->
+    <color name="burnished_copper">#9C5F2D</color>     <!-- CTA / playback highlights -->
+    <color name="pale_sage">#D7E3CB</color>            <!-- Cards / subtle sections -->
+    <color name="warm_ivory">#F7F3EA</color>           <!-- Main background (light) -->
+    <color name="charcoal_olive">#1F1F1A</color>       <!-- Dark surface / body text -->
+    <color name="muted_moss_gray">#6A7263</color>      <!-- Secondary text / metadata -->
+
+    <!-- Theme colors - Light -->
+    <color name="background_light">@color/warm_ivory</color>
+    <color name="background_elevated_light">@color/pale_sage</color>
+    <color name="text_color_secondary_light">@color/muted_moss_gray</color>
+    <color name="color_surface_variant_light">@color/pale_sage</color>
+    <color name="color_secondary_container_light">#C8D9B8</color>
+
+    <!-- Theme colors - Dark -->
+    <color name="background_darktheme">@color/charcoal_olive</color>
+    <color name="background_elevated_darktheme">#2C2C25</color>
+    <color name="text_color_secondary_dark">#A8B09E</color>
+    <color name="color_surface_variant_dark">#2F3528</color>
+    <color name="color_secondary_container_dark">#3D4A30</color>
+
     <color name="non_square_icon_background">#22777777</color>
     <color name="seek_background_light">#90000000</color>
     <color name="seek_background_dark">#905B5B5B</color>
-    <color name="text_color_secondary_light">#444444</color>
-    <color name="text_color_secondary_dark">#cccccc</color>
-    <color name="color_surface_variant_light">#D3DCE0</color>
-    <color name="color_surface_variant_dark">#2F3B4F</color>
-    <color name="color_secondary_container_light">#A5B8C0</color>
-    <color name="color_secondary_container_dark">#4D5F80</color>
 
-    <color name="accent_light">#0078C2</color>
-    <color name="accent_dark">#3D8BFF</color>
+    <!-- Accent: Scheele Green for light, lightened for dark -->
+    <color name="accent_light">@color/scheele_green</color>
+    <color name="accent_dark">#72B83A</color>
 
-    <color name="gradient_000">#364ff3</color>
-    <color name="gradient_025">#2E6FF6</color>
-    <color name="gradient_075">#1EB0FC</color>
-    <color name="gradient_100">#16d0ff</color>
+    <!-- Gradient: copper-to-green -->
+    <color name="gradient_000">@color/burnished_copper</color>
+    <color name="gradient_025">#8A6030</color>
+    <color name="gradient_075">#507820</color>
+    <color name="gradient_100">@color/scheele_green</color>
 </resources>

@@ -2,10 +2,12 @@ package de.danoeh.antennapod.ui.episodeslist;
 
 import android.content.Context;
 import android.os.Handler;
+import android.text.InputType;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.EditText;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -16,13 +18,17 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import java.util.ArrayList;
+
 import de.danoeh.antennapod.R;
 import de.danoeh.antennapod.event.MessageEvent;
 import de.danoeh.antennapod.model.feed.Feed;
 import de.danoeh.antennapod.net.download.serviceinterface.DownloadServiceInterface;
 import de.danoeh.antennapod.storage.preferences.PlaybackPreferences;
 import de.danoeh.antennapod.playback.service.PlaybackServiceInterface;
+import de.danoeh.antennapod.storage.database.DBReader;
 import de.danoeh.antennapod.storage.database.DBWriter;
+import de.danoeh.antennapod.storage.preferences.EpisodeGroupPreferences;
 import de.danoeh.antennapod.ui.common.IntentUtils;
 import de.danoeh.antennapod.playback.service.PlaybackStatus;
 import de.danoeh.antennapod.ui.share.ShareUtils;
@@ -72,6 +78,9 @@ public class FeedItemMenuHandler {
         boolean canRemoveFavorite = false;
         boolean canShowTranscript = false;
         boolean canShowSocialInteract = false;
+        boolean canAddToGroup = false;
+        boolean canRemoveFromGroup = false;
+        boolean canQueueGroup = false;
 
         for (FeedItem item : selectedItems) {
             final boolean hasMedia = item.getMedia() != null;
@@ -95,6 +104,14 @@ public class FeedItemMenuHandler {
             canShowSocialInteract |= item.getSocialInteractUrl() != null;
         }
 
+        // Group items shown only for single-item selection (context not available here;
+        // remove_from_group and queue_group are guarded in the click handler)
+        if (selectedItems.size() == 1) {
+            canAddToGroup = true;
+            canRemoveFromGroup = true;
+            canQueueGroup = true;
+        }
+
         if (selectedItems.size() > 1) {
             canVisitWebsite = false;
             canShare = false;
@@ -105,6 +122,7 @@ public class FeedItemMenuHandler {
         setItemVisibility(menu, R.id.skip_episode_item, canSkip);
         setItemVisibility(menu, R.id.remove_from_queue_item, canRemoveFromQueue);
         setItemVisibility(menu, R.id.add_to_queue_item, canAddToQueue);
+        setItemVisibility(menu, R.id.play_next_item, canAddToQueue);
         setItemVisibility(menu, R.id.visit_website_item, canVisitWebsite);
         setItemVisibility(menu, R.id.share_item, canShare);
         setItemVisibility(menu, R.id.remove_inbox_item, canRemoveFromInbox);
@@ -127,6 +145,9 @@ public class FeedItemMenuHandler {
         setItemVisibility(menu, R.id.remove_item, canDelete);
         setItemVisibility(menu, R.id.download_item, canDownload);
         setItemVisibility(menu, R.id.transcript_item, canShowTranscript);
+        setItemVisibility(menu, R.id.add_to_group_item, canAddToGroup);
+        setItemVisibility(menu, R.id.remove_from_group_item, canRemoveFromGroup);
+        setItemVisibility(menu, R.id.queue_group_item, canQueueGroup);
 
         if (selectedItems.size() == 1 && selectedItems.get(0).getFeed().getState() == Feed.STATE_NOT_SUBSCRIBED) {
             setItemVisibility(menu, R.id.mark_read_item, false);
@@ -193,8 +214,10 @@ public class FeedItemMenuHandler {
         } else if (menuItemId == R.id.mark_unread_item) {
             new EpisodeMultiSelectActionHandler(fragment.getActivity(), R.id.mark_unread_item)
                     .handleAction(Collections.singletonList(selectedItem));
+        } else if (menuItemId == R.id.play_next_item) {
+            DBWriter.addQueueItemNext(context, selectedItem);
         } else if (menuItemId == R.id.add_to_queue_item) {
-            DBWriter.addQueueItem(context, selectedItem);
+            DBWriter.addQueueItemToEnd(context, selectedItem);
         } else if (menuItemId == R.id.remove_from_queue_item) {
             DBWriter.removeQueueItem(context, true, selectedItem);
         } else if (menuItemId == R.id.add_to_favorites_item) {
@@ -222,6 +245,48 @@ public class FeedItemMenuHandler {
         } else if (menuItemId == R.id.share_item) {
             ShareDialog shareDialog = ShareDialog.newInstance(selectedItem);
             shareDialog.show((fragment.getActivity().getSupportFragmentManager()), "ShareEpisodeDialog");
+        } else if (menuItemId == R.id.add_to_group_item) {
+            showAddToGroupDialog(fragment, selectedItem);
+        } else if (menuItemId == R.id.remove_from_group_item) {
+            String existingGroup = EpisodeGroupPreferences.getGroup(context, selectedItem.getId());
+            if (existingGroup != null) {
+                EpisodeGroupPreferences.setGroup(context, selectedItem.getId(), null);
+                EventBus.getDefault().post(new MessageEvent(
+                        context.getString(R.string.removed_from_group_message, existingGroup)));
+            }
+        } else if (menuItemId == R.id.queue_group_item) {
+            String groupName = EpisodeGroupPreferences.getGroup(context, selectedItem.getId());
+            if (groupName == null) {
+                // Not in a group — just add this episode
+                DBWriter.addQueueItemToEnd(context, selectedItem);
+            } else {
+                new MaterialAlertDialogBuilder(context)
+                        .setTitle(R.string.queue_group_label)
+                        .setMessage(context.getString(R.string.queue_group_question, groupName))
+                        .setPositiveButton(R.string.queue_group_add_all, (dialog, which) -> {
+                            java.util.List<Long> groupIds =
+                                    EpisodeGroupPreferences.getEpisodesInGroup(context, groupName);
+                            java.util.concurrent.Executors.newSingleThreadExecutor().execute(() -> {
+                                java.util.List<FeedItem> groupItems = new ArrayList<>();
+                                for (long id : groupIds) {
+                                    FeedItem fi = DBReader.getFeedItem(id);
+                                    if (fi != null) {
+                                        groupItems.add(fi);
+                                    }
+                                }
+                                // Sort by publication date so multi-part episodes queue in order
+                                groupItems.sort((a, b) -> {
+                                    if (a.getPubDate() == null || b.getPubDate() == null) return 0;
+                                    return a.getPubDate().compareTo(b.getPubDate());
+                                });
+                                DBWriter.addQueueItemToEnd(context,
+                                        groupItems.toArray(new FeedItem[0]));
+                            });
+                        })
+                        .setNegativeButton(R.string.queue_group_add_one,
+                                (dialog, which) -> DBWriter.addQueueItemToEnd(context, selectedItem))
+                        .show();
+            }
         } else {
             Log.d(TAG, "Unknown menuItemId: " + menuItemId);
             return false;
@@ -296,6 +361,38 @@ public class FeedItemMenuHandler {
 
     public static void removeNewFlagWithUndo(@NonNull Fragment fragment, FeedItem item) {
         markReadWithUndo(fragment, item, FeedItem.UNPLAYED, false);
+    }
+
+    private static void showAddToGroupDialog(@NonNull Fragment fragment, @NonNull FeedItem item) {
+        Context context = fragment.requireContext();
+        String currentGroup = EpisodeGroupPreferences.getGroup(context, item.getId());
+
+        EditText input = new EditText(context);
+        input.setInputType(InputType.TYPE_CLASS_TEXT);
+        input.setHint(R.string.group_name_hint);
+        if (currentGroup != null) {
+            input.setText(currentGroup);
+        }
+
+        // Suggest existing group names as a subtitle
+        java.util.List<String> existing = EpisodeGroupPreferences.getAllGroupNames(context);
+        String subtitle = existing.isEmpty() ? null
+                : context.getString(R.string.group_name_existing) + " " + String.join(", ", existing);
+
+        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(context)
+                .setTitle(R.string.group_name_dialog_title)
+                .setView(input)
+                .setPositiveButton(android.R.string.ok, (dialog, which) -> {
+                    String name = input.getText().toString().trim();
+                    EpisodeGroupPreferences.setGroup(context, item.getId(),
+                            name.isEmpty() ? null : name);
+                })
+                .setNegativeButton(android.R.string.cancel, null);
+
+        if (subtitle != null) {
+            builder.setMessage(subtitle);
+        }
+        builder.show();
     }
 
 }

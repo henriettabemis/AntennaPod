@@ -21,10 +21,10 @@
         <item name="dragview_background">@drawable/ic_drag_lighttheme</item>
         <item name="scrollbar_thumb">@drawable/scrollbar_thumb_light</item>
         <item name="icon_red">#CF1800</item>
-        <item name="icon_yellow">#F59F00</item>
-        <item name="icon_green">#008537</item>
+        <item name="icon_yellow">#B87333</item>
+        <item name="icon_green">@color/scheele_green</item>
         <item name="icon_purple">#5F1984</item>
-        <item name="icon_gray">#25365A</item>
+        <item name="icon_gray">@color/muted_moss_gray</item>
         <item name="android:splitMotionEvents">false</item>
         <item name="android:fitsSystemWindows">false</item>
         <item name="android:windowContentTransitions">true</item>
@@ -35,32 +35,33 @@
 
     <style name="Theme.AntennaPod.Light" parent="Theme.AntennaPod.Dynamic.Light">
         <item name="isMaterial3DynamicColorApplied">false</item>
-        <item name="colorPrimary">@color/accent_light</item>
-        <item name="colorOnPrimary">@color/white</item>
-        <item name="colorAccent">@color/accent_light</item>
-        <item name="colorSecondary">@color/accent_light</item>
-        <item name="colorOnSecondary">@color/white</item>
-        <item name="colorPrimaryDark">@color/accent_light</item>
-        <item name="colorPrimaryContainer">#D6E6F3</item>
-        <item name="colorOnPrimaryContainer">@color/black</item>
-        <item name="android:colorBackground">@color/background_light</item>
-        <item name="colorSurface">@color/background_light</item>
-        <item name="colorOnSurface">@color/black</item>
-        <item name="colorOnContainer">@color/black</item>
-        <item name="colorSurfaceVariant">@color/color_surface_variant_light</item>
-        <item name="colorOnSurfaceVariant">@color/text_color_secondary_light</item>
-        <item name="colorSurfaceContainer">#EBEEF3</item>
+        <!-- Primary: Deep Moss green for buttons; Scheele Green for links/icons -->
+        <item name="colorPrimary">@color/deep_moss</item>
+        <item name="colorOnPrimary">@color/warm_ivory</item>
+        <item name="colorAccent">@color/scheele_green</item>
+        <item name="colorSecondary">@color/burnished_copper</item>
+        <item name="colorOnSecondary">@color/warm_ivory</item>
+        <item name="colorPrimaryDark">@color/deep_moss</item>
+        <item name="colorPrimaryContainer">@color/pale_sage</item>
+        <item name="colorOnPrimaryContainer">@color/charcoal_olive</item>
+        <item name="android:colorBackground">@color/warm_ivory</item>
+        <item name="colorSurface">@color/warm_ivory</item>
+        <item name="colorOnSurface">@color/charcoal_olive</item>
+        <item name="colorOnContainer">@color/charcoal_olive</item>
+        <item name="colorSurfaceVariant">@color/pale_sage</item>
+        <item name="colorOnSurfaceVariant">@color/muted_moss_gray</item>
+        <item name="colorSurfaceContainer">@color/pale_sage</item>
         <item name="colorSecondaryContainer">@color/color_secondary_container_light</item>
-        <item name="colorOnSecondaryContainer">@color/black</item>
-        <item name="android:textColorPrimary">@color/black</item>
-        <item name="android:textColorSecondary">@color/text_color_secondary_light</item>
-        <item name="android:textColorTertiary">@color/text_color_secondary_light</item>
-        <item name="colorOutline">@color/text_color_secondary_light</item>
-        <item name="colorOutlineVariant">@color/text_color_secondary_light</item>
-        <item name="colorSurfaceContainerHigh">@color/color_surface_variant_light</item>
-        <item name="colorSurfaceContainerHighest">@color/color_surface_variant_light</item>
-        <item name="colorSurfaceContainerLow">@color/color_surface_variant_light</item>
-        <item name="colorSurfaceContainerLowest">@color/color_surface_variant_light</item>
+        <item name="colorOnSecondaryContainer">@color/charcoal_olive</item>
+        <item name="android:textColorPrimary">@color/charcoal_olive</item>
+        <item name="android:textColorSecondary">@color/muted_moss_gray</item>
+        <item name="android:textColorTertiary">@color/muted_moss_gray</item>
+        <item name="colorOutline">@color/muted_moss_gray</item>
+        <item name="colorOutlineVariant">@color/pale_sage</item>
+        <item name="colorSurfaceContainerHigh">@color/pale_sage</item>
+        <item name="colorSurfaceContainerHighest">@color/pale_sage</item>
+        <item name="colorSurfaceContainerLow">@color/pale_sage</item>
+        <item name="colorSurfaceContainerLowest">@color/warm_ivory</item>
     </style>
 
     <style name="Theme.AntennaPod.Dynamic.Dark" parent="Theme.Base.AntennaPod.Dynamic.Dark">

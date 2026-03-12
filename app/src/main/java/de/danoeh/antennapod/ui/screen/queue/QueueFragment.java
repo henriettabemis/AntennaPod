@@ -64,6 +64,7 @@ import de.danoeh.antennapod.ui.episodeslist.FeedItemMenuHandler;
 import de.danoeh.antennapod.model.feed.FeedItem;
 import de.danoeh.antennapod.model.feed.FeedItemFilter;
 import de.danoeh.antennapod.model.feed.SortOrder;
+import de.danoeh.antennapod.storage.preferences.EpisodeGroupPreferences;
 import de.danoeh.antennapod.storage.preferences.UserPreferences;
 import de.danoeh.antennapod.ui.view.EmptyViewHandler;
 import de.danoeh.antennapod.ui.episodeslist.EpisodeItemListRecyclerView;
@@ -393,6 +394,18 @@ public class QueueFragment extends Fragment implements MaterialToolbar.OnMenuIte
                 recyclerAdapter.notifyItemMoved(position, queue.size() - 1);
                 DBWriter.moveQueueItemsToBottom(Collections.singletonList(selectedItem));
                 return true;
+            } else if (itemId == R.id.lock_queue_item_item) {
+                EpisodeGroupPreferences.setQueueLocked(requireContext(), selectedItem.getId(), true);
+                recyclerAdapter.notifyItemChanged(position);
+                EventBus.getDefault().post(new de.danoeh.antennapod.event.MessageEvent(
+                        getString(R.string.queue_item_position_locked)));
+                return true;
+            } else if (itemId == R.id.unlock_queue_item_item) {
+                EpisodeGroupPreferences.setQueueLocked(requireContext(), selectedItem.getId(), false);
+                recyclerAdapter.notifyItemChanged(position);
+                EventBus.getDefault().post(new de.danoeh.antennapod.event.MessageEvent(
+                        getString(R.string.queue_item_position_unlocked)));
+                return true;
             }
         }
         return FeedItemMenuHandler.onMenuItemClicked(this, item.getItemId(), selectedItem);
@@ -676,6 +689,20 @@ public class QueueFragment extends Fragment implements MaterialToolbar.OnMenuIte
                               @NonNull RecyclerView.ViewHolder target) {
             int fromPosition = viewHolder.getBindingAdapterPosition();
             int toPosition = target.getBindingAdapterPosition();
+
+            // Refuse move if the dragged item or the target slot's item is position-locked
+            if (queue != null && fromPosition >= 0 && fromPosition < queue.size()) {
+                FeedItem dragged = queue.get(fromPosition);
+                if (EpisodeGroupPreferences.isQueueItemLocked(requireContext(), dragged.getId())) {
+                    return false;
+                }
+            }
+            if (queue != null && toPosition >= 0 && toPosition < queue.size()) {
+                FeedItem targetItem = queue.get(toPosition);
+                if (EpisodeGroupPreferences.isQueueItemLocked(requireContext(), targetItem.getId())) {
+                    return false;
+                }
+            }
 
             // Update tracked position
             if (dragFrom == -1) {

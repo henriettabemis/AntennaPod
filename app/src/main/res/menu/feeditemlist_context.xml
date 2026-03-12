@@ -21,14 +21,34 @@
         android:title="@string/mark_as_unplayed_label" />
 
     <item
+        android:id="@+id/play_next_item"
+        android:menuCategory="container"
+        android:title="@string/play_next_label" />
+
+    <item
         android:id="@+id/add_to_queue_item"
         android:menuCategory="container"
-        android:title="@string/add_to_queue_label" />
+        android:title="@string/add_to_end_of_queue_label" />
 
     <item
         android:id="@+id/remove_from_queue_item"
         android:menuCategory="container"
         android:title="@string/remove_from_queue_label" />
+
+    <item
+        android:id="@+id/add_to_group_item"
+        android:menuCategory="container"
+        android:title="@string/add_to_group_label" />
+
+    <item
+        android:id="@+id/remove_from_group_item"
+        android:menuCategory="container"
+        android:title="@string/remove_from_group_label" />
+
+    <item
+        android:id="@+id/queue_group_item"
+        android:menuCategory="container"
+        android:title="@string/queue_group_label" />
 
     <item
         android:id="@+id/remove_item"

@@ -23,6 +23,10 @@ public class FeedItem implements Serializable {
     public static final String TAG_QUEUE = "Queue";
     /** tag that indicates this item is in favorites */
     public static final String TAG_FAVORITE = "Favorite";
+    /** prefix for episode group tags, e.g. "group:Serial Season 1" */
+    public static final String TAG_GROUP_PREFIX = "group:";
+    /** tag that locks this item's position in the queue */
+    public static final String TAG_QUEUE_LOCKED = "QueueLocked";
 
     private long id;
     /**
@@ -411,6 +415,19 @@ public class FeedItem implements Serializable {
      */
     public boolean isTagged(String tag) {
         return tags.contains(tag);
+    }
+
+    /**
+     * @return the group name if this item belongs to an episode group, or null
+     */
+    @Nullable
+    public String getGroupTag() {
+        for (String tag : tags) {
+            if (tag.startsWith(TAG_GROUP_PREFIX)) {
+                return tag.substring(TAG_GROUP_PREFIX.length());
+            }
+        }
+        return null;
     }
 
     /**
